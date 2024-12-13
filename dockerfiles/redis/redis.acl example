@@ -1,0 +1,2 @@
+# 给default用户配置密码以及权限，也可以配置其他用户和权限
+user default on >test123 ~* +@all
