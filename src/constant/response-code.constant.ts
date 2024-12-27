@@ -5,8 +5,9 @@ export enum ErrorEnum {
     INVALID_USERNAME_PASSWORD = '1002:用户名密码有误',
     ACCESS_TOKEN_EXPIRED = '1003:token已过期',
     REFRESH_TOKEN_EXPIRED = '1004:token已过期',
+    LIMIT_LOGIN = '1005:登陆失败次数过多，暂时限制登录',
 
-    SYSTEM_USER_EXISTS = '2001:系统用户已存在',
+    SYSTEM_USER_EXISTS = '2001:创建失败，用户已存在',
     INVALID_PASSWORD = '2002:密码有误',
     USER_NOT_FOUND = '2003: 用户不存在',
 

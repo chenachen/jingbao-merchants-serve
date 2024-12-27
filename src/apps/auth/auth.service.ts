@@ -18,6 +18,9 @@ import { LoggerService } from 'src/shared/logger/logger.service'
 import { TokenPayload, TokenService } from 'src/shared/token.service'
 import { UserCacheModel } from 'src/common/models/user-cache.model'
 import { UserPayload } from '../../types/prisma'
+import { ConfigService } from '@nestjs/config'
+import { LOGIN_CONFIG_TOKEN, type ILoginConfig } from 'src/config/login.config'
+import dayjs from 'dayjs'
 
 @Injectable()
 export class AuthService {
@@ -26,6 +29,7 @@ export class AuthService {
         private readonly prismaService: PrismaService,
         private readonly loggerService: LoggerService,
         private readonly tokenService: TokenService,
+        private readonly configService: ConfigService,
     ) {}
 
     async genCaptcha(dto: ImageCaptchaDto, ip: string): Promise<ImageCaptcha> {
@@ -65,6 +69,8 @@ export class AuthService {
             ip: null,
             code: null,
         }
+        // 校验成功后移除验证码
+        this.redisService.del(cacheKey)
 
         if (verifyCode.toLowerCase() !== code?.toLowerCase() || requestIp !== ip) {
             this.loggerService.warn(
@@ -73,14 +79,24 @@ export class AuthService {
             )
             throw new BusinessException(ErrorEnum.INVALID_VERIFICATION_CODE)
         }
+    }
 
-        // 校验成功后移除验证码
-        await this.redisService.del(cacheKey)
+    private setUserLoginAttempts(account: string, loginAttempts: number) {
+        return this.prismaService.user.update({
+            where: {
+                account,
+            },
+            data: {
+                loginAttempts,
+                lastAttemptTime: new Date(),
+            },
+        })
     }
 
     async login(dto: LoginDto, ip: string, ua: string) {
         const { account, password, captchaId, verifyCode } = dto
 
+        // 先检查验证码
         await this.checkImgCaptcha(captchaId, verifyCode, ip)
 
         const user = await this.prismaService.user.findUnique({
@@ -92,13 +108,35 @@ export class AuthService {
             },
         })
 
-        if (!user || !(await comparePassword(password, user.password))) {
+        if (!user) {
             throw new BusinessException(ErrorEnum.INVALID_USERNAME_PASSWORD)
         }
 
+        // 判断账号是否处于限制登录状态
+        const { MAX_LOGIN_ATTEMPTS, LOGIN_ATTEMPT_GAP } = this.configService.get<ILoginConfig>(LOGIN_CONFIG_TOKEN)
+        const { lastAttemptTime } = user
+        let loginAttempts = user.loginAttempts
+        if (user.loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+            if (dayjs(lastAttemptTime).add(LOGIN_ATTEMPT_GAP, 'minute').isBefore(dayjs())) {
+                loginAttempts = 0
+            } else {
+                throw new BusinessException(ErrorEnum.LIMIT_LOGIN)
+            }
+        }
+
+        // 判断密码是否正确
+        const compareResult = await comparePassword(password, user.password)
+        if (!compareResult) {
+            loginAttempts += 1
+            await this.setUserLoginAttempts(account, loginAttempts)
+
+            throw new BusinessException(ErrorEnum.INVALID_USERNAME_PASSWORD, { loginAttempts })
+        }
+
+        this.setUserLoginAttempts(account, 0)
         const payload = {
             account: user.account,
-            level: user.level,
+            type: user.type,
             id: user.id,
             nickname: user.nickname,
             roleId: user.roleId,

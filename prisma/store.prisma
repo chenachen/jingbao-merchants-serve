@@ -4,7 +4,7 @@ model Store {
   brand     String?  @db.VarChar(255) // 所属品牌
   ownerId   Int      @unique // 店主
   owner     User     @relation(fields: [ownerId], references: [id], name: "StoreOwner")
-  desc String @db.Text
+  desc      String   @db.Text
   users     User[]   @relation("UserStore")
   Role      Role[]
   createdAt DateTime @default(now())

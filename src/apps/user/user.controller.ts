@@ -8,6 +8,7 @@ import { IdDto } from '../../common/dto/id.dto'
 import { UpdatePasswordDto } from './dto/update-password.dto'
 import { AuthUser } from '../../common/decorators/auth-user.decorator'
 import { TokenPayload } from '../../shared/token.service'
+import { Public } from '../../common/decorators/public.decorator'
 
 @ApiTags('用户管理')
 @ApiBearerAuth()
@@ -15,10 +16,11 @@ import { TokenPayload } from '../../shared/token.service'
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    @ApiOperation({ summary: '创建用户' })
-    @Post('create')
+    @Public()
+    @ApiOperation({ summary: '用户注册' })
+    @Post('register')
     create(@Body() createUserDto: CreateUserDto) {
-        return this.userService.create(createUserDto)
+        return this.userService.register(createUserDto)
     }
 
     @ApiOperation({ summary: '获取用户列表' })

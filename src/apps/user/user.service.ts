@@ -5,7 +5,7 @@ import { PrismaService } from 'src/shared/prisma.service'
 import { comparePassword, passwordEncryption } from '../../common/utils/password-encryption'
 import { UserListDto } from './dto/user-list.dto'
 import { excludeField } from '../../common/utils/prisma-helper'
-import { User } from '@prisma/client'
+import { User, Prisma } from '@prisma/client'
 import { BusinessException } from '../../common/exceptions/business.exception'
 import { ErrorEnum } from '../../constant/response-code.constant'
 import { UpdatePasswordDto } from './dto/update-password.dto'
@@ -22,21 +22,23 @@ export class UserService {
         private readonly loggerService: LoggerService,
     ) {}
 
-    async create(createUserDto: CreateUserDto) {
+    async register(createUserDto: CreateUserDto) {
         try {
-            const { password, ...otherData } = createUserDto
+            const { password, birthday, ...otherData } = createUserDto
+            const user: Prisma.UserCreateInput = {
+                ...otherData,
+                password: await passwordEncryption(password),
+                birthday: new Date(birthday),
+            }
 
             await this.prismaService.user.create({
-                data: {
-                    password: await passwordEncryption(password),
-                    ...otherData,
-                },
+                data: user,
             })
         } catch (e) {
             this.errHandler(e)
         }
 
-        return ResponseModel.success({ message: '用户创建成功' })
+        return ResponseModel.success({ message: '注册成功' })
     }
 
     async getList(userListDto: UserListDto) {
@@ -46,7 +48,7 @@ export class UserService {
             [sortName]: sortOrder,
         }
 
-        let where
+        let where: Prisma.UserWhereInput
         if (searchType && searchText) {
             where = {
                 [searchType]: {

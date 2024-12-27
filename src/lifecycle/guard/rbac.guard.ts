@@ -4,7 +4,7 @@ import { PERMISSION_KEY, PUBLIC_KEY } from '../../constant/auth.constant'
 import { Request } from 'express'
 import { PermissionCode } from '../../constant/permission.constant'
 import { TokenPayload } from '../../shared/token.service'
-import { UserLevel } from '@prisma/client'
+import { UserType } from '@prisma/client'
 import { RolesService } from '../../apps/roles/roles.service'
 
 @Injectable()
@@ -42,7 +42,7 @@ export class RbacGuard implements CanActivate {
         }
 
         // 管理员放行
-        if (user.level === UserLevel.ADMIN) {
+        if (user.type === UserType.OWNER) {
             return true
         }
 

@@ -59,3 +59,4 @@ prisma/migrations
 dev-docker-compose.yml
 /dockerfiles/redis/redis.acl
 /upload/*
+migrations

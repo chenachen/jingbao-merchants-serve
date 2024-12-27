@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Headers, Ip, Post, Query, Request } from '@nestjs/common'
+import { Body, Controller, Get, Headers, Ip, Post, Query, Req } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger'
+import { Request } from 'express'
 
 import { AuthService } from './auth.service'
 import { LoginDto } from './dto/login.dto'
@@ -25,7 +26,7 @@ export class AuthController {
     @Public()
     @Post('refreshToken')
     @ApiOperation({ summary: '更新accessToken' })
-    async refreshToken(@Request() request, @Ip() ip: string, @Headers('user-agent') ua: string) {
+    async refreshToken(@Req() request: Request, @Ip() ip: string, @Headers('user-agent') ua: string) {
         const token = ExtractJwt.fromAuthHeaderAsBearerToken()(request)
         return await this.authService.refreshToken(token, ip, ua)
     }

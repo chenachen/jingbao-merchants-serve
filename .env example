@@ -22,4 +22,5 @@ REDIS_PORT=6379
 DATABASE_URL="postgresql://postgres:password@localhost:5432/demo?schema=public"
 
 UPLOAD_FILE_DIR=DIR
-
+MAX_LOGIN_ATTEMPTS=5# 最大登录尝试次数
+LOGIN_ATTEMPT_GAP=5#登录时间间隔，单位分钟

@@ -15,29 +15,30 @@ enum Gender {
 }
 
 model User {
-  id            Int        @id @default(autoincrement())
-  account       String     @unique @db.VarChar(255) // 登录账号
-  password      String     @db.VarChar(255) // 密码
-  phone         String     @db.VarChar(20) // 手机号
-  email         String     @db.VarChar(255) // 邮箱
-  nickname      String     @db.VarChar(255) // 昵称
-  name          String     @db.VarChar(255) // 真名
-  idNumber      String     @db.VarChar(20) //身份证号
-  status        UserStatus @default(ACTIVE) // 账号状态
-  type          UserType   @default(EMPLOYEE) // 用户类型，老板还是雇员
-  avatar        String     @db.VarChar(255) // 头像
-  gender        Gender // 性别
-  birthday      DateTime? // 生日
-  lastLoginTime DateTime? // 最后登陆时间
-  lastLoginIp   String?    @db.VarChar(20) // 最后登录IP
-  loginAttempts Int        @default(0) @db.SmallInt // 登录失败次数
-  roleId        Int? // 角色
-  role          Role?      @relation(fields: [roleId], references: [id])
-  storeId       Int // 所属店铺
-  store         Store      @relation(fields: [storeId], references: [id], name: "UserStore")
-  ownedStore    Store?     @relation("StoreOwner") // 店铺owner对应的反向关系字段
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id              Int        @id @default(autoincrement())
+  account         String     @unique @db.VarChar(255) // 登录账号
+  password        String     @db.VarChar(255) // 密码
+  phone           String     @db.VarChar(20) // 手机号
+  email           String     @db.VarChar(255) // 邮箱
+  nickname        String     @db.VarChar(255) // 昵称
+  name            String     @db.VarChar(255) // 真名
+  idNumber        String     @db.VarChar(20) //身份证号
+  status          UserStatus @default(ACTIVE) // 账号状态
+  type            UserType   @default(EMPLOYEE) // 用户类型，老板还是雇员
+  avatar          String?    @db.VarChar(255) // 头像
+  gender          Gender // 性别
+  birthday        DateTime? // 生日
+  lastLoginTime   DateTime? // 最后登陆时间
+  lastLoginIp     String?    @db.VarChar(20) // 最后登录IP
+  loginAttempts   Int        @default(0) @db.SmallInt // 登录失败次数
+  lastAttemptTime DateTime? // 最后尝试登录时间
+  roleId          Int? // 角色
+  role            Role?      @relation(fields: [roleId], references: [id])
+  storeId         Int? // 所属店铺
+  store           Store?     @relation(fields: [storeId], references: [id], name: "UserStore")
+  ownedStore      Store?     @relation("StoreOwner") // 店铺owner对应的反向关系字段
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 }
 
 model Role {

@@ -1,5 +1,5 @@
 # 使用官方的 Redis 镜像作为基础镜像
-FROM redis:7.2.5
+FROM redis:7.2.6
 
 WORKDIR /data
 
@@ -9,6 +9,9 @@ COPY ./redis.acl /usr/local/etc/redis/redis.acl
 
 # 暴露Redis服务器的默认端口
 EXPOSE 6379
+
+RUN mkdir "/var/log/redis" && \
+    chmod a+x /var/log/redis
 
 VOLUME [ "/data", "/var/log/redis" ]
 

@@ -1,5 +1,5 @@
 # 使用官方 PostgreSQL 镜像
-FROM postgres:16.3-bullseye
+FROM postgres:16.6
 
 # 设置环境变量
 ENV POSTGRES_DB demo
